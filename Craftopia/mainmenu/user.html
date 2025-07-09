@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - Craftopia</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/logo.png">
+  <style>
+    body { background: linear-gradient(135deg, #fff6fa 0%, #ffe6ef 100%); min-height: 100vh; margin: 0; font-family: 'Montserrat', Arial, sans-serif; }
+    .profile-header { display: flex; flex-direction: column; align-items: center; margin-top: 36px; }
+    .profile-header-card { background: #fff; border-radius: 24px; box-shadow: 0 4px 24px rgba(231,166,182,0.13); display: flex; flex-direction: column; align-items: center; padding: 36px 36px 28px 36px; max-width: 420px; width: 100%; margin: 0 auto 24px auto; }
+    .profile-header-avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 5px solid #ffe6ef; box-shadow: 0 2px 8px rgba(231,166,182,0.10); background: #fff6fa; margin-top: -70px; margin-bottom: 12px; z-index: 2; position: relative; }
+    .profile-header-info { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0; }
+    .profile-header-username { font-size: 2.1rem; font-weight: 800; color: #e75480; margin-bottom: 2px; text-align: center; }
+    .profile-header-date { color: #b48a99; font-size: 1.1rem; margin-bottom: 2px; text-align: center; }
+    .profile-tabs { display: flex; justify-content: center; gap: 36px; background: transparent; border-bottom: 1.5px solid #f8dbe7; box-shadow: 0 2px 8px rgba(231,166,182,0.04); margin-bottom: 0; padding: 0; }
+    .profile-tab { background: none; border: none; color: #e75480; font-weight: 700; font-size: 1.1rem; padding: 18px 0 12px 0; margin: 0 18px; border-bottom: 3px solid transparent; cursor: pointer; transition: border 0.2s, color 0.2s; }
+    .profile-tab.active { border-bottom: 3px solid #e75480; color: #e75480; }
+    .profile-content { max-width: 700px; margin: 36px auto 0 auto; background: #fff; border-radius: 18px; box-shadow: 0 2px 8px rgba(231,166,182,0.08); padding: 36px 40px 32px 40px; min-height: 220px; }
+    .project-card { background: #fff6fa; border-radius: 14px; box-shadow: 0 2px 8px rgba(231,166,182,0.08); padding: 18px 18px 12px 18px; display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
+    .project-thumb { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; background: #fff; border: 1.5px solid #f3d6e3; }
+    .project-info { flex: 1; display: flex; flex-direction: column; }
+    .project-title { font-size: 1.13rem; font-weight: 700; color: #e75480; margin-bottom: 2px; }
+    .project-meta { color: #b48a99; font-size: 0.98rem; }
+    @media (max-width: 700px) { .profile-header-card, .profile-content { max-width: 99vw; padding: 18px 2vw 18px 2vw; } }
+    /* Center profile info card content */
+    #profile-info-card {
+      text-align: center;
+      margin: 0 auto;
+      max-width: 420px;
+    }
+    #profile-location {
+      margin-bottom: 8px;
+      display: block;
+      font-size: 1.08rem;
+    }
+    #profile-about {
+      display: block;
+      font-size: 1.08rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer;">
+      <img src="assets/logo.png" alt="Craftopia Logo">
+      <span>Craftopia</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Projects</a>
+    </nav>
+  </header>
+  <main>
+    <div class="profile-header">
+      <div class="profile-header-card">
+        <img id="profile-avatar" class="profile-header-avatar" src="assets/logo.png" alt="User Avatar">
+        <div class="profile-header-info">
+          <div id="profile-username" class="profile-header-username">Username</div>
+          <div id="profile-date-joined" class="profile-header-date"></div>
+        </div>
+      </div>
+      <div class="profile-tabs">
+        <button class="profile-tab active" data-tab="profile">Profile</button>
+        <button class="profile-tab" data-tab="projects">Projects</button>
+      </div>
+    </div>
+    <div class="profile-content" id="profile-tab-content">
+      <div id="profile-info-card">
+        <div id="profile-location" style="margin-bottom:8px;"></div>
+        <div id="profile-about"></div>
+      </div>
+      <div id="profile-empty-card" style="display:none;text-align:center;color:#b48a99;">No profile info provided.</div>
+    </div>
+    <div class="profile-content" id="projects-tab-content" style="display:none;">
+      <ul id="projects-list" style="list-style:none;padding:0;margin:0;"></ul>
+      <div id="projects-empty" style="display:none;text-align:center;color:#b48a99;">No projects yet.</div>
+    </div>
+  </main>
+  <footer class="footer">
+    <span id="copyright"></span>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/user.js"></script>
+  <script>document.getElementById('copyright').textContent = `© ${new Date().getFullYear()} Craftopia. All rights reserved.`;</script>
+</body>
+</html> 

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Project - Craftopia</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <img src="assets/logo.png" alt="Craftopia Logo">
+      <span>Craftopia</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" id="projects-link">Projects</a>
+      <div class="profile-menu-container">
+        <img id="header-profile-avatar" src="assets/logo.png" alt="Profile" class="header-profile-avatar">
+        <div class="profile-dropdown" id="profile-dropdown">
+          <a href="profile.html#profile" id="menu-my-profile"><span>👤</span> My Profile</a>
+          <a href="profile.html#favorites" id="menu-favorites"><span>❤️</span> Favorites</a>
+          <a href="profile.html#settings" id="menu-settings"><span>⚙️</span> Settings</a>
+          <a href="#" id="menu-logout"><span>🚪</span> Log Out</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main class="main-container">
+    <div class="upload-card card">
+      <h2 style="text-align:center;color:#e75480;margin-bottom:32px;">Upload Your Project</h2>
+      <form id="upload-form">
+        <div class="form-group">
+          <label for="title">Project Title</label>
+          <input type="text" id="title" required>
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" rows="4" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" required>
+            <option value="cooking">Cooking</option>
+            <option value="design">Design</option>
+            <option value="crafts">Crafts</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="media">Upload Images/Videos</label>
+          <input type="file" id="media" accept="image/*,video/*" multiple required>
+          <div class="file-note">You can select multiple images or videos.</div>
+        </div>
+        <div id="upload-status" style="color:#e75480;margin-bottom:12px;"></div>
+        <button type="submit" class="upload-btn">Submit Project</button>
+      </form>
+    </div>
+  </main>
+  <footer class="footer">
+    <span id="copyright"></span>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/profile-menu.js"></script>
+</body>
+</html> 

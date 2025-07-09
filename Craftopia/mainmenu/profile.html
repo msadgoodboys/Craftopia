@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Craftopia</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/logo.png">
+  <style>s
+    body {
+      background: linear-gradient(135deg, #fff6fa 0%, #ffe6ef 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+    }
+    .profile-header {
+      background: none;
+      box-shadow: none;
+      border-radius: 0;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      max-width: 100vw;
+      min-height: unset;
+    }
+    .profile-header-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 4px 24px rgba(231, 166, 182, 0.13);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 36px 36px 28px 36px;
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto 24px auto;
+      position: relative;
+      top: 0;
+    }
+    .profile-header-avatar {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid #ffe6ef;
+      box-shadow: 0 2px 8px rgba(231, 166, 182, 0.10);
+      background: #fff6fa;
+      margin-top: -70px;
+      margin-bottom: 12px;
+      z-index: 2;
+      position: relative;
+    }
+    .profile-header-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
+    .profile-header-username {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #e75480;
+      margin-bottom: 2px;
+      text-align: center;
+    }
+    .profile-header-date {
+      color: #b48a99;
+      font-size: 1.1rem;
+      margin-bottom: 2px;
+      text-align: center;
+    }
+    .profile-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 36px;
+      background: transparent;
+      border-bottom: 1.5px solid #f8dbe7;
+      box-shadow: 0 2px 8px rgba(231, 166, 182, 0.04);
+      margin-bottom: 0;
+      padding: 0 0 0 0;
+    }
+    .profile-tab {
+      background: none;
+      border: none;
+      color: #e75480;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 18px 0 12px 0;
+      margin: 0 18px;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      transition: border 0.2s, color 0.2s;
+    }
+    .profile-tab.active {
+      border-bottom: 3px solid #e75480;
+      color: #e75480;
+    }
+    .profile-content {
+      max-width: 700px;
+      margin: 36px auto 0 auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px rgba(231, 166, 182, 0.08);
+      padding: 36px 40px 32px 40px;
+      min-height: 220px;
+    }
+    .profile-settings-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .profile-settings-form label {
+      font-weight: 600;
+      color: #e75480;
+      margin-bottom: 4px;
+    }
+    .profile-settings-form input, .profile-settings-form textarea {
+      border-radius: 6px;
+      border: 1px solid #f3d6e3;
+      padding: 8px 12px;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      width: 100%;
+      resize: vertical;
+    }
+    .profile-settings-form button {
+      background: #e75480;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 0;
+      font-weight: 700;
+      font-size: 1.1rem;
+      width: 100%;
+      margin-top: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .profile-settings-form button:hover {
+      background: #b48a99;
+    }
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: auto;
+      background: rgba(231, 166, 182, 0.13);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 32px rgba(231, 166, 182, 0.18);
+      padding: 36px 40px 32px 40px;
+      min-width: 340px;
+      max-width: 95vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 24px;
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      color: #e75480;
+      cursor: pointer;
+    }
+    .modal-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #ffe6ef;
+      margin-bottom: 18px;
+      background: #fff6fa;
+    }
+    .modal label {
+      font-weight: 600;
+      color: #e75480;
+      margin-bottom: 4px;
+      display: block;
+      text-align: left;
+    }
+    .modal input, .modal textarea {
+      border-radius: 6px;
+      border: 1px solid #f3d6e3;
+      padding: 8px 12px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      width: 100%;
+      resize: vertical;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      margin-top: 10px;
+      justify-content: flex-end;
+    }
+    .modal-actions button {
+      background: #e75480;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 24px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .modal-actions button.cancel {
+      background: #f3d6e3;
+      color: #e75480;
+    }
+    .modal-actions button:hover:not(.cancel) {
+      background: #b48a99;
+    }
+    .modal-status {
+      color: #e75480;
+      font-size: 0.98em;
+      margin-bottom: 8px;
+      min-height: 18px;
+      text-align: center;
+      width: 100%;
+    }
+    .projects-list, .favorites-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .project-card, .favorite-card {
+      background: #fff6fa;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(231, 166, 182, 0.08);
+      padding: 18px 18px 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      transition: box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .project-card:hover, .favorite-card:hover {
+      box-shadow: 0 4px 16px rgba(231, 166, 182, 0.18);
+    }
+    .project-thumb, .favorite-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #fff;
+      border: 2px solid #ffe6ef;
+    }
+    .project-info, .favorite-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .project-title, .favorite-title {
+      font-weight: 700;
+      color: #e75480;
+      font-size: 1.1rem;
+    }
+    .project-meta, .favorite-meta {
+      color: #b48a99;
+      font-size: 0.98rem;
+    }
+    @media (max-width: 900px) {
+      .profile-header-card { padding: 18px 4vw 18px 4vw; }
+      .profile-header-avatar { margin-top: -60px; }
+      .profile-content { padding: 18px 6vw; }
+      .profile-tabs { gap: 10px; }
+      .modal-content { padding: 18px 4vw; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <img src="assets/logo.png" alt="Craftopia Logo">
+      <span>Craftopia</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" id="projects-link">Projects</a>
+      <a href="login.html" id="login-link" class="header-btn">Log In</a>
+      <a href="signup.html" id="signup-link" class="header-btn signup">Sign Up</a>
+      <a href="#" id="profile-link" class="header-btn active">Profile</a>
+      <a href="#" id="logout-link">Logout</a>
+    </nav>
+  </header>
+  <main>
+    <section class="profile-header">
+      <div class="profile-header-card">
+        <img id="profile-avatar" src="assets/logo.png" alt="User Avatar" class="profile-header-avatar">
+        <div class="profile-header-info">
+          <div class="profile-header-username" id="profile-username">Username</div>
+          <div class="profile-header-date" id="profile-date-joined">Joined: --/--/----</div>
+        </div>
+      </div>
+    </section>
+    <nav class="profile-tabs">
+      <button class="profile-tab active" data-tab="profile">Profile</button>
+      <button class="profile-tab" data-tab="projects">Projects</button>
+      <button class="profile-tab" data-tab="favorites">Favorites</button>
+      <button class="profile-tab" data-tab="settings">Settings</button>
+    </nav>
+    <section class="profile-content" id="profile-tab-content">
+      <div id="profile-info-card" style="display:none;text-align:center;">
+        <div id="profile-location" style="margin-top:12px;font-weight:600;color:#e75480;"></div>
+        <div id="profile-about" style="margin-top:8px;color:#b48a99;"></div>
+        <button id="edit-profile-btn" style="margin-top:18px;background:#e75480;color:#fff;border:none;border-radius:6px;padding:10px 24px;font-weight:600;font-size:1rem;cursor:pointer;">Edit Profile</button>
+      </div>
+      <div id="profile-empty-card" style="text-align:center;color:#b48a99;font-size:1.1rem;">
+        Tell us about yourself!<br>
+        <button id="open-edit-profile-modal" style="margin-top:16px;background:#e75480;color:#fff;border:none;border-radius:6px;padding:10px 24px;font-weight:600;font-size:1rem;cursor:pointer;">Complete Your Profile</button>
+      </div>
+    </section>
+    <section class="profile-content" id="projects-tab-content" style="display:none;">
+      <!-- Projects tab content goes here -->
+      <ul class="projects-list" id="projects-list"></ul>
+      <div id="projects-empty" style="text-align:center;color:#b48a99;font-size:1.1rem;display:none;">You have no projects yet.</div>
+    </section>
+    <section class="profile-content" id="favorites-tab-content" style="display:none;">
+      <!-- Favorites tab content goes here -->
+      <ul class="favorites-list" id="favorites-list"></ul>
+      <div id="favorites-empty" style="text-align:center;color:#b48a99;font-size:1.1rem;display:none;">You have no favorite projects yet.</div>
+    </section>
+    <section class="profile-content" id="settings-tab-content" style="display:none;">
+      <!-- Settings tab content goes here -->
+      <form class="profile-settings-form">
+        <label for="edit-username">Change Username</label>
+        <input type="text" id="edit-username" placeholder="Edit username">
+        <button id="save-username-btn" type="button">Save Username</button>
+        <label for="new-password">Change Password</label>
+        <input type="password" id="new-password" placeholder="New Password" required minlength="6" />
+        <button id="update-password-btn" type="button">Update Password</button>
+        <div id="settings-status"></div>
+      </form>
+    </section>
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="edit-profile-modal">
+      <div class="modal-content">
+        <button class="modal-close" id="close-edit-profile-modal">&times;</button>
+        <img id="modal-avatar" src="assets/logo.png" alt="Avatar" class="modal-avatar">
+        <input type="file" id="modal-avatar-upload" accept="image/*" style="margin-bottom:10px;">
+        <div class="modal-status" id="modal-status"></div>
+        <form id="edit-profile-form" style="width:100%;">
+          <label for="modal-location">Location</label>
+          <input type="text" id="modal-location" placeholder="Enter your location">
+          <label for="modal-about">About</label>
+          <textarea id="modal-about" rows="4" placeholder="Tell us about yourself..."></textarea>
+          <div class="modal-actions">
+            <button type="button" class="cancel" id="cancel-edit-profile">Cancel</button>
+            <button type="submit" id="save-edit-profile">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+  <footer class="footer">
+    <span id="copyright"></span>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

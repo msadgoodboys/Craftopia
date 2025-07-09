@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Details - Craftopia</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/logo.png">
+  <style>
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 0 32px 0 18px; background: #ffe6ef; min-height: 64px; }
+    .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .logo img { width: 38px; height: 38px; border-radius: 50%; }
+    .logo span { font-size: 2rem; font-weight: 800; color: #e75480; letter-spacing: 1px; font-family: 'Montserrat', Arial, sans-serif; }
+    .nav { display: flex; align-items: center; gap: 18px; }
+    .nav a, .nav button { background: none; border: none; color: #e75480; font-weight: 600; font-size: 1.1rem; cursor: pointer; padding: 6px 14px; border-radius: 6px; transition: background 0.2s; text-decoration: none; }
+    .nav a:hover, .nav button:hover { background: #ffe6ef; }
+    .project-detail-section { max-width: 700px; margin: 40px auto; background: #fff6fa; border-radius: 16px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .project-detail-card { background: #fff; border-radius: 16px; padding: 32px 40px; box-shadow: 0 2px 8px rgba(231, 166, 182, 0.10); text-align: center; }
+    .project-detail-img { width: 100%; max-width: 420px; border-radius: 12px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(231, 166, 182, 0.10); }
+    .project-title { font-size: 2.1rem; font-weight: 800; color: #e75480; margin: 18px 0 8px 0; letter-spacing: 0.5px; }
+    .creator-detail { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
+    .creator-detail img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+    .creator-name { font-size: 1.1rem; font-weight: 700; color: #b48a99; }
+    .project-detail-desc { color: #555; margin: 18px 0 12px 0; font-size: 1.15rem; line-height: 1.6; }
+    .project-detail-meta { margin-bottom: 18px; color: #e75480; font-weight: 600; font-size: 1.1rem; }
+    .project-detail-actions { margin-bottom: 18px; }
+    .project-detail-actions button { background: #e75480; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1rem; font-weight: 600; margin: 0 8px; cursor: pointer; transition: background 0.2s; }
+    .project-detail-actions button.liked, .project-detail-actions button.favorited { background: #b48a99; }
+    .project-detail-actions button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .project-detail-comments { margin-top: 32px; background: #fff6fa; border-radius: 8px; padding: 18px 12px; box-shadow: 0 1px 4px rgba(231, 166, 182, 0.08); }
+    .project-detail-comments h3 { color: #e75480; margin-bottom: 8px; }
+    .comment-list { list-style: none; padding: 0; margin: 0 0 18px 0; }
+    .comment-list li { padding: 8px 0; border-bottom: 1px solid #f3d6e3; text-align: left; }
+    .comment-list li:last-child { border-bottom: none; }
+    .comment-author { font-weight: 700; color: #b48a99; margin-right: 8px; }
+    .comment-date { color: #aaa; font-size: 0.95rem; margin-left: 8px; }
+    .comment-form { display: flex; gap: 8px; margin-top: 10px; }
+    .comment-form input { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #f3d6e3; }
+    .comment-form button { background: #e75480; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 600; cursor: pointer; }
+    @media (max-width: 800px) { .project-detail-section, .project-detail-card { padding: 10px; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo" id="craftopia-logo">
+      <img src="assets/logo.png" alt="Craftopia Logo">
+      <span>Craftopia</span>
+    </div>
+    <nav class="nav">
+      <a href="profile.html">Profile</a>
+      <button id="logout-btn">Logout</button>
+    </nav>
+  </header>
+  <main>
+    <section class="project-detail-section">
+      <div class="project-detail-card" id="project-detail-card">
+        <div id="project-loading">Loading project...</div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <span id="copyright"></span>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script>
+    // Dynamic copyright year
+    document.getElementById('copyright').textContent = `© ${new Date().getFullYear()} Craftopia. All rights reserved.`;
+
+    // Logo click to main menu
+    document.getElementById('craftopia-logo').onclick = () => { window.location.href = 'index.html'; };
+
+    // Logout button
+    document.getElementById('logout-btn').onclick = async () => {
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
+    };
+
+    // Get project id from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+    const card = document.getElementById('project-detail-card');
+    const loading = document.getElementById('project-loading');
+    let currentUser = null;
+    let liked = false;
+    let favorited = false;
+
+    // Load current user
+    async function getCurrentUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      currentUser = user;
+    }
+
+    // Load project details
+    async function loadProject() {
+      await getCurrentUser();
+      const { data: project, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .single();
+      if (error || !project) {
+        loading.textContent = 'Project not found.';
+        return;
+      }
+      loading.style.display = 'none';
+      let mediaUrls = Array.isArray(project.media_urls) ? project.media_urls : [];
+      if (typeof project.media_urls === 'string') {
+        try { mediaUrls = JSON.parse(project.media_urls); } catch { mediaUrls = []; }
+      }
+      // Fetch creator's avatar_url from profiles
+      let creatorAvatar = 'assets/logo.png';
+      if (project.user_id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', project.user_id)
+          .single();
+        if (profile && profile.avatar_url) creatorAvatar = profile.avatar_url;
+      }
+      let carouselHtml = '';
+      if (mediaUrls.length > 1) {
+        carouselHtml = `
+          <div class="carousel-container detail">
+            <button class="carousel-arrow left" style="display:none">&#8592;</button>
+            <img src="${mediaUrls[0]}" alt="Project Image" class="project-detail-img carousel-img">
+            <button class="carousel-arrow right">&#8594;</button>
+          </div>
+        `;
+      } else {
+        const thumb = (mediaUrls[0]) ? mediaUrls[0] : 'assets/sample1.jpg';
+        carouselHtml = `<img src="${thumb}" alt="Project Image" class="project-detail-img carousel-img">`;
+      }
+      // Check if current user is the owner
+      const isOwner = currentUser && project.user_id === currentUser.id;
+      card.innerHTML = `
+        ${carouselHtml}
+        <div class="project-title">${project.title}</div>
+        <div class="creator-detail">
+          <img src="${creatorAvatar}" alt="Creator Avatar">
+          <span class="creator-name">${project.creator_name || 'Anonymous'}</span>
+        </div>
+        <p class="project-detail-desc">${project.description}</p>
+        <div class="project-detail-meta">
+          <span class="likes" id="likes-count">❤️ ${project.likes_count || 0}</span>
+          <span class="comments" id="comments-count">💬 ${project.comments_count || 0}</span>
+        </div>
+        <div class="project-detail-actions">
+          <button id="like-btn">Like</button>
+          <button id="favorite-btn">Favorite</button>
+          ${isOwner ? `<button id="edit-project-btn" style="background:#f3d6e3;color:#e75480;">Edit</button><button id="delete-project-btn" style="background:#e75480;color:#fff;">Delete</button>` : ''}
+        </div>
+        <div class="project-detail-comments">
+          <h3>Comments</h3>
+          <ul class="comment-list" id="comment-list"></ul>
+          <form class="comment-form" id="comment-form">
+            <input type="text" id="comment-input" placeholder="Add a comment..." required maxlength="300">
+            <button type="submit">Post</button>
+          </form>
+        </div>
+        <div id="edit-project-modal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.18);z-index:1000;align-items:center;justify-content:center;">
+          <div class="modal-content" style="background:#fff;border-radius:22px;max-width:440px;width:96vw;padding:38px 28px 32px 28px;box-shadow:0 6px 32px rgba(231,166,182,0.13);position:relative;display:flex;flex-direction:column;align-items:center;">
+            <button id="close-edit-modal" style="position:absolute;top:18px;right:22px;font-size:2rem;background:none;border:none;color:#e75480;cursor:pointer;font-weight:700;">&times;</button>
+            <h2 style="color:#e75480;margin-bottom:22px;font-size:2rem;font-weight:800;text-align:center;">Edit Project</h2>
+            <form id="edit-project-form" style="width:100%;display:flex;flex-direction:column;gap:16px;">
+              <label for="edit-title" style="font-weight:600;color:#e75480;">Title</label>
+              <input type="text" id="edit-title" style="width:100%;margin-bottom:2px;padding:10px 12px;border-radius:8px;border:1.5px solid #f3d6e3;font-size:1.08em;background:#fff6fa;" required>
+              <label for="edit-description" style="font-weight:600;color:#e75480;">Description</label>
+              <textarea id="edit-description" rows="3" style="width:100%;margin-bottom:2px;padding:10px 12px;border-radius:8px;border:1.5px solid #f3d6e3;font-size:1.08em;background:#fff6fa;resize:vertical;" required></textarea>
+              <label for="edit-category" style="font-weight:600;color:#e75480;">Category</label>
+              <select id="edit-category" style="width:100%;margin-bottom:2px;padding:10px 12px;border-radius:8px;border:1.5px solid #f3d6e3;font-size:1.08em;background:#fff6fa;" required>
+                <option value="cooking">Cooking</option>
+                <option value="design">Design</option>
+                <option value="crafts">Crafts</option>
+              </select>
+              <label style="font-weight:600;color:#e75480;">Images</label>
+              <div id="edit-images-list" style="display:flex;flex-wrap:wrap;gap:12px 10px;margin-bottom:6px;"></div>
+              <input type="file" id="edit-add-images" accept="image/*" multiple style="margin-bottom:8px;">
+              <button type="submit" style="background:#e75480;color:#fff;padding:12px 0;width:100%;border:none;border-radius:10px;font-weight:800;font-size:1.13rem;box-shadow:0 2px 8px rgba(231,166,182,0.10);margin-top:8px;">Save Changes</button>
+              <div id="edit-project-status" style="margin-top:10px;color:#e75480;text-align:center;"></div>
+            </form>
+          </div>
+        </div>
+      `;
+      // Carousel JS logic
+      if (mediaUrls.length > 1) {
+        const leftBtn = card.querySelector('.carousel-arrow.left');
+        const rightBtn = card.querySelector('.carousel-arrow.right');
+        const img = card.querySelector('.carousel-img');
+        let idx = 0;
+        leftBtn.onclick = (e) => {
+          e.preventDefault();
+          idx = (idx - 1 + mediaUrls.length) % mediaUrls.length;
+          img.src = mediaUrls[idx];
+          leftBtn.style.display = idx === 0 ? 'none' : '';
+          rightBtn.style.display = idx === mediaUrls.length - 1 ? 'none' : '';
+        };
+        rightBtn.onclick = (e) => {
+          e.preventDefault();
+          idx = (idx + 1) % mediaUrls.length;
+          img.src = mediaUrls[idx];
+          leftBtn.style.display = idx === 0 ? 'none' : '';
+          rightBtn.style.display = idx === mediaUrls.length - 1 ? 'none' : '';
+        };
+        leftBtn.style.display = 'none';
+        rightBtn.style.display = mediaUrls.length > 1 ? '' : 'none';
+      }
+      setupLikeFavorite(project);
+      await updateLikesCount(project.id);
+      loadComments();
+      setupCommentForm();
+      // Edit/Delete logic
+      if (isOwner) {
+        // Delete
+        card.querySelector('#delete-project-btn').onclick = async () => {
+          if (!confirm('Are you sure you want to delete this project? This cannot be undone.')) return;
+          const { error } = await supabase.from('projects').delete().eq('id', projectId);
+          if (error) {
+            alert('Failed to delete project: ' + error.message);
+          } else {
+            alert('Project deleted.');
+            window.location.href = 'index.html';
+          }
+        };
+        // Edit
+        const modal = card.querySelector('#edit-project-modal');
+        const openBtn = card.querySelector('#edit-project-btn');
+        const closeBtn = card.querySelector('#close-edit-modal');
+        const form = card.querySelector('#edit-project-form');
+        const statusDiv = card.querySelector('#edit-project-status');
+        const imagesList = card.querySelector('#edit-images-list');
+        let editMediaUrls = [...mediaUrls];
+        function renderEditImages() {
+          imagesList.innerHTML = '';
+          editMediaUrls.forEach((url, idx) => {
+            const imgDiv = document.createElement('div');
+            imgDiv.style.position = 'relative';
+            imgDiv.style.display = 'inline-block';
+            imgDiv.style.margin = '0 8px 8px 0';
+            imgDiv.innerHTML = `
+              <img src="${url}" style="width:70px;height:70px;object-fit:cover;border-radius:10px;border:1.5px solid #f3d6e3;box-shadow:0 2px 8px rgba(231,166,182,0.10);background:#fff;">
+              <button data-idx="${idx}" style="position:absolute;top:4px;right:4px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid #e75480;color:#e75480;font-size:1.1rem;font-weight:700;border-radius:50%;box-shadow:0 2px 8px rgba(231,166,182,0.10);cursor:pointer;transition:background 0.18s,border 0.18s;z-index:2;padding:0;line-height:1;">
+                &times;
+              </button>
+            `;
+            const btn = imgDiv.querySelector('button');
+            btn.onmouseenter = () => { btn.style.background = '#ffe6ef'; btn.style.borderColor = '#b48a99'; };
+            btn.onmouseleave = () => { btn.style.background = '#fff'; btn.style.borderColor = '#e75480'; };
+            btn.onclick = (e) => {
+              e.preventDefault();
+              editMediaUrls.splice(idx, 1);
+              renderEditImages();
+            };
+            imagesList.appendChild(imgDiv);
+          });
+          imagesList.style.marginBottom = '10px';
+          imagesList.style.alignItems = 'center';
+        }
+        openBtn.onclick = () => {
+          modal.style.display = 'flex';
+          form['edit-title'].value = project.title;
+          form['edit-description'].value = project.description;
+          // Set the dropdown to the correct category
+          const catSel = form['edit-category'];
+          if (catSel && catSel.tagName === 'SELECT') {
+            catSel.value = project.category || 'design';
+          } else if (catSel) {
+            catSel.value = project.category;
+          }
+          editMediaUrls = [...mediaUrls];
+          renderEditImages();
+          statusDiv.textContent = '';
+        };
+        // Add new images
+        const addImagesInput = card.querySelector('#edit-add-images');
+        addImagesInput.onchange = async function() {
+          if (!addImagesInput.files.length) return;
+          statusDiv.textContent = 'Uploading image(s)...';
+          for (let i = 0; i < addImagesInput.files.length; i++) {
+            const file = addImagesInput.files[i];
+            const fileExt = file.name.split('.').pop();
+            const filePath = `${currentUser.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
+            let { error: uploadError } = await supabase.storage.from('project-media').upload(filePath, file);
+            if (uploadError) {
+              statusDiv.textContent = 'Upload failed: ' + uploadError.message;
+              return;
+            }
+            const { data } = supabase.storage.from('project-media').getPublicUrl(filePath);
+            editMediaUrls.push(data.publicUrl);
+          }
+          renderEditImages();
+          statusDiv.textContent = '';
+          addImagesInput.value = '';
+        };
+        closeBtn.onclick = () => { modal.style.display = 'none'; };
+        modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+          statusDiv.textContent = 'Saving...';
+          const updates = {
+            title: form['edit-title'].value.trim(),
+            description: form['edit-description'].value.trim(),
+            category: form['edit-category'].value.trim(),
+            media_urls: editMediaUrls,
+            creator_name: project.creator_name || (currentUser && currentUser.email) || '',
+            user_id: project.user_id
+          };
+          console.log('Project update payload:', updates);
+          try {
+            const { data, error } = await supabase.from('projects').update(updates).eq('id', projectId).select();
+            console.log('Project update result:', { data, error });
+            if (error) {
+              statusDiv.textContent = 'Failed to save: ' + error.message;
+              statusDiv.style.color = '#d32f2f';
+              console.error('Project update error:', error);
+            } else if (!data || !data.length) {
+              statusDiv.textContent = 'Update failed: No data returned. Check RLS policies.';
+              statusDiv.style.color = '#d32f2f';
+              console.error('Project update: No data returned.');
+            } else {
+              statusDiv.textContent = 'Project updated!';
+              statusDiv.style.color = '#e75480';
+              setTimeout(() => { modal.style.display = 'none'; loadProject(); }, 800);
+            }
+          } catch (err) {
+            statusDiv.textContent = 'Failed to save: ' + (err.message || JSON.stringify(err));
+            statusDiv.style.color = '#d32f2f';
+            console.error('Project update exception:', err);
+          }
+        };
+      }
+    }
+
+    // Like/Favorite logic (simple per-user per-project, using a new table for each)
+    async function setupLikeFavorite(project) {
+      if (!currentUser) return;
+      // Check if liked
+      const { data: likeData } = await supabase
+        .from('project_likes')
+        .select('*')
+        .eq('project_id', project.id)
+        .eq('user_id', currentUser.id)
+        .single();
+      liked = !!likeData;
+      document.getElementById('like-btn').classList.toggle('liked', liked);
+      document.getElementById('like-btn').textContent = liked ? 'Liked' : 'Like';
+      document.getElementById('like-btn').onclick = async () => {
+        if (!currentUser) return;
+        if (liked) {
+          await supabase.from('project_likes').delete().eq('project_id', project.id).eq('user_id', currentUser.id);
+        } else {
+          await supabase.from('project_likes').insert([{ project_id: project.id, user_id: currentUser.id }]);
+        }
+        await updateLikesCount(project.id);
+        await setupLikeFavorite(project);
+      };
+      // Check if favorited
+      const { data: favData } = await supabase
+        .from('project_favorites')
+        .select('*')
+        .eq('project_id', project.id)
+        .eq('user_id', currentUser.id)
+        .single();
+      favorited = !!favData;
+      document.getElementById('favorite-btn').classList.toggle('favorited', favorited);
+      document.getElementById('favorite-btn').textContent = favorited ? 'Favorited' : 'Favorite';
+      document.getElementById('favorite-btn').onclick = async () => {
+        if (!currentUser) return;
+        if (favorited) {
+          await supabase.from('project_favorites').delete().eq('project_id', project.id).eq('user_id', currentUser.id);
+        } else {
+          await supabase.from('project_favorites').insert([{ project_id: project.id, user_id: currentUser.id }]);
+        }
+        await setupLikeFavorite(project);
+      };
+    }
+    async function updateLikesCount(projectId) {
+      const { count } = await supabase
+        .from('project_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', projectId);
+      document.getElementById('likes-count').textContent = `❤️ ${count || 0}`;
+      await supabase.from('projects').update({ likes_count: count || 0 }).eq('id', projectId);
+    }
+
+    // Comments logic
+    async function loadComments() {
+      const { data: comments } = await supabase
+        .from('project_comments')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true });
+      const list = document.getElementById('comment-list');
+      list.innerHTML = '';
+      if (comments && comments.length) {
+        // Fetch all unique user_ids for avatars/usernames
+        const userIds = [...new Set(comments.map(c => c.user_id).filter(Boolean))];
+        let userMap = {};
+        if (userIds.length) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, username, avatar_url')
+            .in('id', userIds);
+          if (profiles) {
+            profiles.forEach(profile => {
+              userMap[profile.id] = profile;
+            });
+          }
+        }
+        comments.forEach(c => {
+          const li = document.createElement('li');
+          li.setAttribute('data-comment-id', c.id);
+          // Use local_created_at if present, else fallback to created_at
+          const displayTime = c.local_created_at ? new Date(c.local_created_at).toLocaleString() : new Date(c.created_at).toLocaleString();
+          const profile = userMap[c.user_id] || {};
+          const avatar = profile.avatar_url || 'assets/logo.png';
+          const username = profile.username || c.creator_name || 'User';
+          li.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+              <a href="user.html?id=${c.user_id}" style="display:inline-block;"><img src="${avatar}" alt="avatar" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #f3d6e3;"></a>
+              <div style="flex:1;">
+                <a href="user.html?id=${c.user_id}" style="font-weight:700;color:#e75480;font-size:1.08em;text-decoration:none;">${username}</a>
+                <span class="comment-date" style="color:#b48a99;font-size:0.98em;margin-left:8px;">${displayTime}</span>
+                ${c.updated_at && c.updated_at !== c.created_at ? '<span class="comment-edited" style="color:#b48a99;font-size:0.95em;margin-left:6px;">(edited)</span>' : ''}
+                <div class="comment-content" style="margin:2px 0 0 0;color:#333;font-size:1.08em;word-break:break-word;">${c.content}</div>
+                ${currentUser && c.user_id === currentUser.id ? `
+                  <div class="comment-actions" style="margin-top:4px;">
+                    <button class="edit-comment-btn" style="background:#f3d6e3;color:#e75480;">Edit</button>
+                    <button class="delete-comment-btn" style="background:#e75480;color:#fff;">Delete</button>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+        // Add event listeners for edit/delete
+        document.querySelectorAll('.edit-comment-btn').forEach(btn => {
+          btn.onclick = async function() {
+            const li = this.closest('li');
+            const commentId = li.getAttribute('data-comment-id');
+            const contentSpan = li.querySelector('.comment-content');
+            const originalContent = contentSpan.textContent;
+            // Hide edit/delete buttons while editing
+            li.querySelectorAll('.edit-comment-btn, .delete-comment-btn').forEach(b => b.style.display = 'none');
+            // Replace content with input
+            contentSpan.innerHTML = `<input type='text' value="${originalContent}" class='edit-comment-input' style='width:60%;padding:4px 8px;border-radius:4px;border:1px solid #f3d6e3;'> <button class='save-edit-btn' style='background:#e75480;color:#fff;margin-left:6px;'>Save</button> <button class='cancel-edit-btn' style='background:#f3d6e3;color:#e75480;margin-left:4px;'>Cancel</button>`;
+            li.querySelector('.save-edit-btn').onclick = async () => {
+              const newContent = li.querySelector('.edit-comment-input').value.trim();
+              if (!newContent) return alert('Comment cannot be empty.');
+              await supabase.from('project_comments').update({ content: newContent, updated_at: new Date().toISOString() }).eq('id', commentId);
+              await loadComments();
+            };
+            li.querySelector('.cancel-edit-btn').onclick = () => {
+              contentSpan.textContent = originalContent;
+              // Restore edit/delete buttons
+              li.querySelectorAll('.edit-comment-btn, .delete-comment-btn').forEach(b => b.style.display = '');
+            };
+          };
+        });
+        document.querySelectorAll('.delete-comment-btn').forEach(btn => {
+          btn.onclick = async function() {
+            if (!confirm('Are you sure you want to delete this comment?')) return;
+            const li = this.closest('li');
+            const commentId = li.getAttribute('data-comment-id');
+            await supabase.from('project_comments').delete().eq('id', commentId);
+            await loadComments();
+          };
+        });
+      } else {
+        list.innerHTML = '<li style="color:#b48a99;">No comments yet.</li>';
+      }
+      document.getElementById('comments-count').textContent = `💬 ${comments ? comments.length : 0}`;
+    }
+    function setupCommentForm() {
+      const form = document.getElementById('comment-form');
+      const input = document.getElementById('comment-input');
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        if (!currentUser) return;
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', currentUser.id)
+          .single();
+        // NOTE: Requires DB migration: ALTER TABLE project_comments ADD COLUMN local_created_at timestamptz;
+        await supabase.from('project_comments').insert([
+          {
+            project_id: projectId,
+            user_id: currentUser.id,
+            creator_name: profile && profile.username ? profile.username : currentUser.email,
+            content: input.value,
+            local_created_at: new Date() // Store user's local time
+          }
+        ]);
+        input.value = '';
+        await loadComments();
+      };
+    }
+    loadProject();
+
+    // Polish modal/card layout (enlarge and professionalize)
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .project-detail-section, .project-detail-card {
+        max-width: 720px !important;
+        margin: 56px auto !important;
+        border-radius: 22px !important;
+        box-shadow: 0 8px 32px rgba(231,166,182,0.13) !important;
+        padding: 0 !important;
+        background: #fff6fa !important;
+      }
+      .project-detail-card {
+        padding: 48px 48px 32px 48px !important;
+        background: #fff !important;
+        border-radius: 22px !important;
+        box-shadow: 0 4px 16px rgba(231,166,182,0.13) !important;
+      }
+      .project-title {
+        font-size: 2.4rem !important;
+        font-weight: 900 !important;
+        margin: 24px 0 10px 0 !important;
+        letter-spacing: 0.5px !important;
+      }
+      .project-detail-meta, .project-detail-actions {
+        font-size: 1.18rem !important;
+      }
+      .project-detail-actions button {
+        font-size: 1.08rem !important;
+        padding: 10px 26px !important;
+        border-radius: 10px !important;
+      }
+      .creator-detail img {
+        width: 44px !important;
+        height: 44px !important;
+      }
+      .creator-name {
+        font-size: 1.18rem !important;
+      }
+      .project-detail-img, .carousel-img {
+        max-width: 520px !important;
+        max-height: 380px !important;
+        border-radius: 18px !important;
+      }
+      .carousel-container.detail {
+        max-width: 540px !important;
+        min-height: 380px !important;
+        border-radius: 18px !important;
+      }
+      @media (max-width: 900px) {
+        .project-detail-section, .project-detail-card {
+          max-width: 99vw !important;
+          padding: 0 !important;
+        }
+        .project-detail-card {
+          padding: 12px 2vw 12px 2vw !important;
+        }
+        .project-detail-img, .carousel-img {
+          max-width: 98vw !important;
+          max-height: 40vw !important;
+        }
+        .carousel-container.detail {
+          max-width: 99vw !important;
+          min-height: 30vw !important;
+        }
+      }
+      .modal-content {
+        max-width: 520px !important;
+        width: 99vw !important;
+        padding: 44px 28px 32px 28px !important;
+        border-radius: 22px !important;
+        box-shadow: 0 12px 48px rgba(231,166,182,0.18) !important;
+        margin: 0 auto !important;
+      }
+      .modal-content h2 {
+        font-size: 2.2rem !important;
+        font-weight: 900 !important;
+        margin-bottom: 28px !important;
+      }
+      @media (max-width: 600px) {
+        .modal-content {
+          max-width: 99vw !important;
+          padding: 12px 2vw 12px 2vw !important;
+        }
+        .modal-content h2 {
+          font-size: 1.3rem !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html> 

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <script>
+    // Redirect to confirm.html if access_token is present in the hash
+    if (window.location.hash.includes('access_token')) {
+      window.location.replace('/mainmenu/confirm.html' + window.location.hash);
+    }
+  </script>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html> 

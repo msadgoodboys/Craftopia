@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Craftopia - Home</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/logo.png">
+</head>
+<body>
+  <script>
+    // Redirect to confirm.html if access_token is present in the hash
+    if (window.location.hash.includes('access_token')) {
+      window.location.replace('/mainmenu/confirm.html' + window.location.hash);
+    }
+  </script>
+  <header class="header">
+    <div class="logo">
+      <img src="assets/logo.png" alt="Craftopia Logo">
+      <span>Craftopia</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" id="projects-link">Projects</a>
+      <span id="user-email" style="color:#e75480;"></span>
+      <div class="profile-menu-container">
+        <img id="header-profile-avatar" src="assets/logo.png" alt="Profile" class="header-profile-avatar">
+        <div class="profile-dropdown" id="profile-dropdown">
+          <a href="profile.html#profile" id="menu-my-profile"><span>👤</span> My Profile</a>
+          <a href="profile.html#favorites" id="menu-favorites"><span>❤️</span> Favorites</a>
+          <a href="profile.html#settings" id="menu-settings"><span>⚙️</span> Settings</a>
+          <a href="#" id="menu-logout"><span>🚪</span> Log Out</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <section class="hero-section">
+      <div class="hero-text">
+        <h1>Where Creativity Takes Shape</h1>
+        <p>Craftopia: Create. Connect. Inspire.</p>
+      </div>
+    </section>
+    <section class="search-section">
+      <div class="search-bar-container">
+        <input type="text" id="search-bar" placeholder="Search projects...">
+        <span class="search-icon">🔍</span>
+      </div>
+      <div class="category-tabs">
+        <button class="category-tab active" data-category="all">All</button>
+        <button class="category-tab" data-category="cooking">Cooking</button>
+        <button class="category-tab" data-category="design">Design</button>
+        <button class="category-tab" data-category="crafts">Crafts</button>
+      </div>
+      <div class="sort-options">
+        <button class="sort-btn active" data-sort="latest">Latest</button>
+        <button class="sort-btn" data-sort="popular">Popular</button>
+        <button class="sort-btn" data-sort="random">Random</button>
+      </div>
+    </section>
+    <section class="projects-grid" id="projects-grid">
+      <!-- Project cards rendered by JS -->
+    </section>
+  </main>
+  <button class="floating-upload-btn" id="floating-upload-btn">
+    <span class="plus-icon">+</span> Upload
+  </button>
+  <footer class="footer">
+    <span id="copyright"></span>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/login.js"></script>
+  <script src="js/signup.js"></script>
+  <script src="js/profile-menu.js"></script>
+</body>
+</html> 

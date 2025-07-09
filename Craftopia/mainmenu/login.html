@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In - Craftopia</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <img src="assets/logo.png" alt="Craftopia Logo">
+      <span>Craftopia</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" id="projects-link">Projects</a>
+      <a href="login.html" id="login-link" class="header-btn">Log In</a>
+      <a href="signup.html" id="signup-link" class="header-btn signup">Sign Up</a>
+    </nav>
+  </header>
+  <main>
+    <section class="auth-page-section">
+      <div class="auth-card">
+        <h2>Sign in to Craftopia</h2>
+        <form id="login-form">
+          <input type="email" id="login-email" placeholder="Email" required>
+          <input type="password" id="login-password" placeholder="Password" required>
+          <button type="submit" id="login-submit-btn">Login</button>
+          <div class="auth-error" id="login-error"></div>
+        </form>
+        <div class="auth-switch">
+          Don't have an account? <a href="signup.html">Sign Up</a>
+        </div>
+        <p style="font-size:0.95rem;color:#888;margin-top:12px;">You must verify your email via Gmail to activate your account.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <span id="copyright"></span>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html> 
